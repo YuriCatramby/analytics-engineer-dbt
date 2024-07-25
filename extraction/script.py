@@ -1,8 +1,12 @@
 import os
+from dotenv import load_dotenv
 import requests
 import pandas as pd
 from sqlalchemy import create_engine
 from snowflake.sqlalchemy import URL
+
+# Carregar variáveis de ambiente do arquivo .env
+load_dotenv()
 
 
 class JobicyAPI:
@@ -40,7 +44,21 @@ class Snowflake:
         ))
 
     def save_to_snowflake(self, df: pd.DataFrame, table_name: str):
-        df.to_sql(table_name, self.engine, if_exists='replace', index=False)
+        # Clean missing value
+        df = df.fillna('')
+
+        print(
+            f"Saving to Snowflake: {df.shape[0]} rows and {df.shape[1]} columns")
+
+        # Convert data type
+        df = df.astype(str)
+
+        # Save to Snowflake
+        try:
+            df.to_sql(table_name, self.engine, if_exists='replace',
+                      index=False, method='multi')
+        except Exception as e:
+            print(f"Erro saving to Snowflake: {e}")
 
 
 def main():
@@ -51,7 +69,6 @@ def main():
     )
 
     api.fetch_data()
-
     jobs_df = api.get_jobs_data()
 
     if not jobs_df.empty:
@@ -72,8 +89,7 @@ def main():
         )
 
         saver.save_to_snowflake(jobs_df, table_name='jobs_list')
-        print("Data saves successfully!")
-
+        print("Data saved successfully!")
     else:
         print("There is no data to save in Snowflake!")
 
