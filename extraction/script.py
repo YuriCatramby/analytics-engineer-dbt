@@ -5,7 +5,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 from snowflake.sqlalchemy import URL
 
-# Carregar variáveis de ambiente do arquivo .env
+
 load_dotenv()
 
 
@@ -72,20 +72,13 @@ def main():
     jobs_df = api.get_jobs_data()
 
     if not jobs_df.empty:
-        snowflake_account = os.getenv('SNOWFLAKE_ACCOUNT')
-        snowflake_user = os.getenv('SNOWFLAKE_USER')
-        snowflake_password = os.getenv('SNOWFLAKE_PASSWORD')
-        snowflake_database = os.getenv('SNOWFLAKE_DATABASE')
-        snowflake_schema = os.getenv('SNOWFLAKE_SCHEMA')
-        snowflake_warehouse = os.getenv('SNOWFLAKE_WAREHOUSE')
-
         saver = Snowflake(
-            account=snowflake_account,
-            user=snowflake_user,
-            password=snowflake_password,
-            database=snowflake_database,
-            schema=snowflake_schema,
-            warehouse=snowflake_warehouse
+            account=os.getenv('SNOWFLAKE_ACCOUNT'),
+            user=os.getenv('SNOWFLAKE_USER'),
+            password=os.getenv('SNOWFLAKE_PASSWORD'),
+            database=os.getenv('SNOWFLAKE_DATABASE'),
+            schema=os.getenv('SNOWFLAKE_SCHEMA'),
+            warehouse=os.getenv('SNOWFLAKE_WAREHOUSE')
         )
 
         saver.save_to_snowflake(jobs_df, table_name='jobs_list')
